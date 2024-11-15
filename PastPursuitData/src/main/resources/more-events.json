@@ -1,0 +1,302 @@
+[
+  {
+    "year": 1969,
+    "month": 7,
+    "day": 20,
+    "event": "Apollo 11 astronauts Neil Armstrong and Buzz Aldrin became the first humans to land on the Moon."
+  },
+  {
+    "year": 1941,
+    "month": 12,
+    "day": 7,
+    "event": "The Japanese attacked Pearl Harbor, leading the United States to enter World War II."
+  },
+  {
+    "year": 1989,
+    "month": 11,
+    "day": 9,
+    "event": "The Berlin Wall fell, marking a symbolic end to the Cold War."
+  },
+  {
+    "year": 1945,
+    "month": 9,
+    "day": 2,
+    "event": "Japan formally surrendered aboard the USS Missouri, officially ending World War II."
+  },
+  {
+    "year": 1776,
+    "month": 7,
+    "day": 4,
+    "event": "The United States Declaration of Independence was adopted in Philadelphia."
+  },
+  {
+    "year": 1929,
+    "month": 10,
+    "day": 29,
+    "event": "The U.S. stock market crashed on Black Tuesday, leading to the Great Depression."
+  },
+  {
+    "year": 1945,
+    "month": 8,
+    "day": 6,
+    "event": "An atomic bomb was dropped on Hiroshima by the United States during World War II."
+  },
+  {
+    "year": 1945,
+    "month": 5,
+    "day": 8,
+    "event": "Victory in Europe Day was celebrated as Nazi Germany's surrender became official."
+  },
+  {
+    "year": 1944,
+    "month": 6,
+    "day": 6,
+    "event": "D-Day occurred as Allied forces landed on the beaches of Normandy, France."
+  },
+  {
+    "year": 1912,
+    "month": 4,
+    "day": 15,
+    "event": "The RMS Titanic sank in the North Atlantic after hitting an iceberg."
+  },
+  {
+    "year": 2001,
+    "month": 9,
+    "day": 11,
+    "event": "Terrorist attacks were carried out on the World Trade Center and the Pentagon in the United States."
+  },
+  {
+    "year": 1963,
+    "month": 11,
+    "day": 22,
+    "event": "U.S. President John F. Kennedy was assassinated in Dallas, Texas."
+  },
+  {
+    "year": 1955,
+    "month": 12,
+    "day": 1,
+    "event": "Rosa Parks refused to give up her seat on a bus in Montgomery, Alabama, sparking the Civil Rights Movement."
+  },
+  {
+    "year": 1914,
+    "month": 6,
+    "day": 28,
+    "event": "Archduke Franz Ferdinand of Austria was assassinated, leading to the outbreak of World War I."
+  },
+  {
+    "year": 1920,
+    "month": 8,
+    "day": 18,
+    "event": "The 19th Amendment was ratified, granting American women the right to vote."
+  },
+  {
+    "year": 1961,
+    "month": 4,
+    "day": 12,
+    "event": "Yuri Gagarin became the first human to journey into outer space."
+  },
+  {
+    "year": 1986,
+    "month": 4,
+    "day": 26,
+    "event": "The Chernobyl nuclear disaster occurred in the Soviet Union."
+  },
+  {
+    "year": 1989,
+    "month": 6,
+    "day": 4,
+    "event": "The Tiananmen Square protests were suppressed by the Chinese government."
+  },
+  {
+    "year": 1990,
+    "month": 2,
+    "day": 11,
+    "event": "Nelson Mandela was released from prison after 27 years in South Africa."
+  },
+  {
+    "year": 1969,
+    "month": 8,
+    "day": 15,
+    "event": "The Woodstock Music Festival began in Bethel, New York."
+  },
+  {
+    "year": 2008,
+    "month": 11,
+    "day": 4,
+    "event": "Barack Obama was elected as the first African-American President of the United States."
+  },
+  {
+    "year": 1985,
+    "month": 9,
+    "day": 1,
+    "event": "The wreck of the RMS Titanic was discovered on the ocean floor."
+  },
+  {
+    "year": 1492,
+    "month": 10,
+    "day": 12,
+    "event": "Christopher Columbus landed in the Americas, marking the beginning of European exploration."
+  },
+  {
+    "year": 1918,
+    "month": 11,
+    "day": 11,
+    "event": "An armistice was signed, effectively ending World War I."
+  },
+  {
+    "year": 1962,
+    "month": 10,
+    "day": 28,
+    "event": "The Cuban Missile Crisis ended as Soviet missiles were removed from Cuba."
+  },
+  {
+    "year": 1963,
+    "month": 8,
+    "day": 28,
+    "event": "Martin Luther King Jr. delivered his \"I Have a Dream\" speech in Washington, D.C."
+  },
+  {
+    "year": 1981,
+    "month": 8,
+    "day": 1,
+    "event": "MTV launched, marking a new era in music and television."
+  },
+  {
+    "year": 1953,
+    "month": 5,
+    "day": 29,
+    "event": "Sir Edmund Hillary and Tenzing Norgay reached the summit of Mount Everest."
+  },
+  {
+    "year": 1991,
+    "month": 12,
+    "day": 25,
+    "event": "The Soviet Union was officially dissolved."
+  },
+  {
+    "year": 2004,
+    "month": 12,
+    "day": 26,
+    "event": "A massive tsunami struck Southeast Asia following a 9.1 magnitude earthquake."
+  },
+  {
+    "year": 2005,
+    "month": 8,
+    "day": 29,
+    "event": "Hurricane Katrina made landfall on the Gulf Coast of the United States."
+  },
+  {
+    "year": 2011,
+    "month": 5,
+    "day": 2,
+    "event": "Osama bin Laden was killed by U.S. forces in Pakistan."
+  },
+  {
+    "year": 2012,
+    "month": 7,
+    "day": 27,
+    "event": "The 2012 Summer Olympics opened in London."
+  },
+  {
+    "year": 2010,
+    "month": 1,
+    "day": 12,
+    "event": "A devastating earthquake struck Haiti, causing widespread destruction."
+  },
+  {
+    "year": 1997,
+    "month": 7,
+    "day": 1,
+    "event": "Hong Kong was handed over from the United Kingdom to China."
+  },
+  {
+    "year": 1969,
+    "month": 6,
+    "day": 28,
+    "event": "The Stonewall riots began in New York City, sparking the modern LGBTQ+ rights movement."
+  },
+  {
+    "year": 1975,
+    "month": 4,
+    "day": 30,
+    "event": "Saigon fell, marking the end of the Vietnam War."
+  },
+  {
+    "year": 1976,
+    "month": 7,
+    "day": 4,
+    "event": "The United States celebrated its Bicentennial."
+  },
+  {
+    "year": 1964,
+    "month": 7,
+    "day": 2,
+    "event": "The Civil Rights Act was signed into law in the United States."
+  },
+  {
+    "year": 2000,
+    "month": 1,
+    "day": 1,
+    "event": "The world celebrated the beginning of the new millennium."
+  },
+  {
+    "year": 1989,
+    "month": 3,
+    "day": 12,
+    "event": "Tim Berners-Lee proposed the World Wide Web."
+  },
+  {
+    "year": 1947,
+    "month": 8,
+    "day": 15,
+    "event": "India gained independence from British rule."
+  },
+  {
+    "year": 1973,
+    "month": 1,
+    "day": 27,
+    "event": "The Paris Peace Accords were signed, intended to establish peace in Vietnam."
+  },
+  {
+    "year": 1957,
+    "month": 10,
+    "day": 4,
+    "event": "Sputnik 1, the first artificial satellite, was launched by the Soviet Union."
+  },
+  {
+    "year": 1962,
+    "month": 2,
+    "day": 20,
+    "event": "John Glenn became the first American to orbit the Earth."
+  },
+  {
+    "year": 2003,
+    "month": 2,
+    "day": 1,
+    "event": "Space Shuttle Columbia disintegrated upon re-entry, killing all seven astronauts."
+  },
+  {
+    "year": 1968,
+    "month": 4,
+    "day": 4,
+    "event": "Martin Luther King Jr. was assassinated in Memphis, Tennessee."
+  },
+  {
+    "year": 2007,
+    "month": 1,
+    "day": 9,
+    "event": "Apple CEO Steve Jobs unveiled the first iPhone."
+  },
+  {
+    "year": 2015,
+    "month": 12,
+    "day": 12,
+    "event": "The Paris Agreement on climate change was adopted by nearly every nation."
+  },
+  {
+    "year": 2020,
+    "month": 3,
+    "day": 11,
+    "event": "The World Health Organization declared COVID-19 a global pandemic."
+  }
+]
