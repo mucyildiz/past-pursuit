@@ -1,0 +1,5 @@
+package org.pastpursuit;
+
+public enum CurrentGameState {
+  WAITING_FOR_PLAYERS, GAME_START, TIMER_START, ROUND_START, WAITING_FOR_GUESSES, ROUND_OVER, GAME_OVER, GAME_EXIT
+}

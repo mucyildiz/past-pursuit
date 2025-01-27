@@ -6,10 +6,20 @@ import jakarta.persistence.Persistence;
 
 public class UserRepository {
   private final EntityManagerFactory emf = Persistence.createEntityManagerFactory("user");
-  public void save(User user) {
+
+  public User save(User user) {
     EntityManager entityManager = emf.createEntityManager();
     entityManager.getTransaction().begin();
     entityManager.persist(user);
+    entityManager.getTransaction().commit();
+    entityManager.close();
+    return user;
+  }
+
+  public void update(User user) {
+    EntityManager entityManager = emf.createEntityManager();
+    entityManager.getTransaction().begin();
+    entityManager.merge(user);
     entityManager.getTransaction().commit();
     entityManager.close();
   }
