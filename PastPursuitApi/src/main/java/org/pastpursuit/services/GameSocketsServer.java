@@ -66,6 +66,17 @@ public class GameSocketsServer extends WebSocketServer {
       case ROUND_START -> handleRoundStart(gameEvent);
       case REMATCH -> handleRematch(gameEvent);
       case PLAYER_LEFT -> handleGameExit(gameEvent);
+      case REMATCH_PROPOSAL -> handleRematchProposal(gameEvent);
+    }
+  }
+
+  private void handleRematchProposal(GameEvent gameEvent) {
+    GameState gameState = gameStates.get(gameEvent.getGameCode());
+    if (gameState.getCurrentState().equals(CurrentGameState.REMATCH_PROPOSED)) {
+      handleRematch(gameEvent);
+    } else {
+      gameState.setCurrentState(CurrentGameState.REMATCH_PROPOSED);
+      broadcastGameState(gameState);
     }
   }
 
@@ -89,13 +100,14 @@ public class GameSocketsServer extends WebSocketServer {
   }
 
   private void handleRoundStart(GameEvent roundStartEvent) {
+    LOG.info("Round start event received: {}", roundStartEvent);
     if (!roundStartEvent.getEventType().equals(GameEventType.ROUND_START)) {
       LOG.error("Event must be ROUND_START, but it was {}", roundStartEvent.getEventType());
     }
 
     GameState gameState = gameStates.get(roundStartEvent.getGameCode());
 
-    if (gameState.getCurrentState().equals(CurrentGameState.WAITING_FOR_GUESSES)) {
+    if (gameState.getCurrentState().equals(CurrentGameState.WAITING_FOR_GUESSES) || gameState.getCurrentState().equals(CurrentGameState.TIMER_START)) {
       LOG.info("Game with code {} already waiting for guesses, not refreshing event.", roundStartEvent.getGameCode());
       return;
     }
@@ -219,7 +231,6 @@ public class GameSocketsServer extends WebSocketServer {
         return;
       }
       gameState.setCurrentState(CurrentGameState.ROUND_OVER);
-      gameState.setCurrentEvent(Optional.empty());
       broadcastGameState(gameState);
     });
   }
