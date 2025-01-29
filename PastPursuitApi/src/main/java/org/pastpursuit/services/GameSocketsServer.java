@@ -48,6 +48,11 @@ public class GameSocketsServer extends WebSocketServer {
   @Override
   public void onClose(WebSocket webSocket, int code, String reason, boolean remote) {
     LOG.info("Connection closed. Code: {}, reason: {}", code, reason);
+    for (GameState gameState : gameStates.values()) {
+      if (gameState.getWebSockets().contains(webSocket)) {
+        gameStates.remove(gameState.getGameCode());
+      }
+    }
     webSocket.close();
   }
 
@@ -61,8 +66,8 @@ public class GameSocketsServer extends WebSocketServer {
       throw new RuntimeException(e);
     }
     switch (gameEvent.getEventType()) {
+      case PLAYER_JOINED -> handleJoin(gameEvent, webSocket);
       case GUESS -> handleGuess(gameEvent);
-      case PLAYER_JOINED -> handleJoin(gameEvent);
       case ROUND_START -> handleRoundStart(gameEvent);
       case REMATCH -> handleRematch(gameEvent);
       case PLAYER_LEFT -> handleGameExit(gameEvent);
@@ -118,32 +123,36 @@ public class GameSocketsServer extends WebSocketServer {
     broadcastGameState(gameState);
   }
 
-  private void handleJoin(GameEvent joinEvent) {
+  private void handleJoin(GameEvent joinEvent, WebSocket webSocket) {
     String gameCode = joinEvent.getGameCode();
     if (!gameStates.containsKey(gameCode)) {
-      createInitialGameState(joinEvent);
+      createInitialGameState(joinEvent, webSocket);
     } else {
-      addUserToExistingGame(joinEvent);
+      addUserToExistingGame(joinEvent, webSocket);
     }
+    GameState gameState = gameStates.get(gameCode);
+    gameState.getWebSockets().add(webSocket);
   }
 
-  private void createInitialGameState(GameEvent joinEvent) {
+  private void createInitialGameState(GameEvent joinEvent, WebSocket webSocket) {
     GameState initialGameState = new GameState();
     initialGameState.setGameCode(joinEvent.getGameCode());
     initialGameState.addUserToGame(joinEvent.getUser());
     initialGameState.setCurrentState(CurrentGameState.WAITING_FOR_PLAYERS);
+    initialGameState.getWebSockets().add(webSocket);
     gameStates.put(joinEvent.getGameCode(), initialGameState);
     broadcastGameState(initialGameState);
     LOG.info("Game {} created with user {}", joinEvent.getGameCode(), joinEvent.getUser());
   }
 
-  private void addUserToExistingGame(GameEvent joinEvent) {
+  private void addUserToExistingGame(GameEvent joinEvent, WebSocket webSocket) {
     GameState existingGame = gameStates.get(joinEvent.getGameCode());
     existingGame.addUserToGame(joinEvent.getUser());
 
     if (existingGame.getUsers().size() == NUM_PLAYERS_PER_GAME) {
       existingGame.setCurrentState(CurrentGameState.GAME_START);
     }
+    existingGame.getWebSockets().add(webSocket);
     broadcastGameState(existingGame);
     LOG.info("User {} joined game {}", joinEvent.getUser(), joinEvent.getGameCode());
     LOG.info("Game state: {}", existingGame);
@@ -262,7 +271,11 @@ public class GameSocketsServer extends WebSocketServer {
 
   private void broadcastGameState(GameState gameState) {
     try {
-      broadcast(objectMapper.writeValueAsString(gameState));
+      for (WebSocket socket : gameState.getWebSockets()) {
+        if (socket.isOpen()) {
+          socket.send(objectMapper.writeValueAsString(gameState));
+        }
+      }
     } catch (JsonProcessingException e) {
       LOG.error("NOOOOOOOOOOOOOOOOO. Failed to broadcast game state", e);
     }
