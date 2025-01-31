@@ -22,7 +22,7 @@ public class UserService {
     newUser.setLosses(0);
     User createdUser = userRepository.save(newUser);
     Response.ResponseBuilder response = Response.status(Response.Status.CREATED).entity(createdUser);
-    response.header("Access-Control-Allow-Origin", "http://localhost:5173");
+    response.header("Access-Control-Allow-Origin", "https://pastpursuit.io");
     response.header("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE, HEAD");
     response.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
     response.header("Access-Control-Allow-Credentials", "true");
@@ -33,7 +33,7 @@ public class UserService {
   @OPTIONS
   public Response handleOptions() {
     Response.ResponseBuilder response = Response.ok();
-    response.header("Access-Control-Allow-Origin", "http://localhost:5173");
+    response.header("Access-Control-Allow-Origin", "https://pastpursuit.io");
     response.header("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE, HEAD");
     response.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
     response.header("Access-Control-Allow-Credentials", "true");
