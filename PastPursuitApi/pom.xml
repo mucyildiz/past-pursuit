@@ -21,7 +21,6 @@
             <groupId>org.pastpursuit</groupId>
             <artifactId>PastPursuitData</artifactId>
             <version>1.0-SNAPSHOT</version>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.github.rholder</groupId>
@@ -37,8 +36,35 @@
             <groupId>org.pastpursuit</groupId>
             <artifactId>PastPursuitLogic</artifactId>
             <version>1.0-SNAPSHOT</version>
-            <scope>compile</scope>
         </dependency>
     </dependencies>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.6.0</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <transformers>
+                                <!-- This transformer adds the Main-Class entry to the manifest -->
+                                <transformer
+                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>org.pastpursuit.Resource</mainClass>
+                                </transformer>
+                            </transformers>
+                            <finalName>app</finalName>
+                            <!-- Optionally, relocate packages if needed -->
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>
