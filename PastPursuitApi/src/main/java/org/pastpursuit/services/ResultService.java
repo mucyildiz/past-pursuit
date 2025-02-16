@@ -21,7 +21,8 @@ public class ResultService {
     for (User user : gameState.getUsers()) {
       GameResult result = new GameResult();
       result.setUserId(user.getId());
-      result.setMatchResult(gameState.getPlayerScores().get(user.getId()) == 5 ? GameResult.MatchResult.WIN : GameResult.MatchResult.LOSS);
+      result.setOpponentId(gameState.getUsers().stream().filter(u -> !u.equals(user)).findFirst().orElseThrow().getId());
+      result.setResult(gameState.getPlayerScores().get(user.getId()).equals(gameState.getPlayerScores().values().stream().max(Integer::compareTo).orElseThrow()) ? GameResult.Result.WIN : GameResult.Result.LOSS);
       resultRepository.save(result);
     }
   }

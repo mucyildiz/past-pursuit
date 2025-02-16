@@ -1,26 +1,22 @@
 package org.pastpursuit;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.Persistence;
+import org.pastpursuit.dynamodb.DynamoDbProvider;
+import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
+import software.amazon.awssdk.services.dynamodb.model.PutItemRequest;
+
+import java.util.Map;
 
 public class UserRepository {
-  private final EntityManagerFactory emf = Persistence.createEntityManagerFactory("user");
+  private final DynamoDbClient dynamoDbClient;
 
-  public User save(User user) {
-    EntityManager entityManager = emf.createEntityManager();
-    entityManager.getTransaction().begin();
-    entityManager.persist(user);
-    entityManager.getTransaction().commit();
-    entityManager.close();
-    return user;
+  public UserRepository() {
+    this.dynamoDbClient = DynamoDbProvider.getClient();
   }
 
-  public void update(User user) {
-    EntityManager entityManager = emf.createEntityManager();
-    entityManager.getTransaction().begin();
-    entityManager.merge(user);
-    entityManager.getTransaction().commit();
-    entityManager.close();
+  public User save(User user) {
+    PutItemRequest putItemRequest = PutItemRequest.builder().tableName("ppdb").item(Map.of("pp_partition_key", AttributeValue.fromS(user.getPartitionKey()))).build();
+    dynamoDbClient.putItem(putItemRequest);
+    return user;
   }
 }

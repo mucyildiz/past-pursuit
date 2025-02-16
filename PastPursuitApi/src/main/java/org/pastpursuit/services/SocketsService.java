@@ -4,77 +4,84 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.google.common.base.Strings;
-import org.java_websocket.WebSocket;
-import org.java_websocket.handshake.ClientHandshake;
-import org.java_websocket.server.WebSocketServer;
+import org.glassfish.grizzly.websockets.DataFrame;
+import org.glassfish.grizzly.websockets.WebSocket;
+import org.glassfish.grizzly.websockets.WebSocketApplication;
 import org.pastpursuit.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class GameSocketsServer extends WebSocketServer {
-  private static final Logger LOG = LoggerFactory.getLogger(GameSocketsServer.class);
+public class SocketsService extends WebSocketApplication {
+  private static final Logger LOG = LoggerFactory.getLogger(SocketsService.class);
   private static final int NUM_PLAYERS_PER_GAME = 2;
   private static final int WINNING_SCORE = 4;
 
   private final ObjectMapper objectMapper = new ObjectMapper();
+  // Game state stored in a concurrent map
+  private final ConcurrentHashMap<String, GameState> gameStates = new ConcurrentHashMap<>();
 
-  // state-of-the-art database technology for storing game states
-  private final ConcurrentHashMap<String, GameState> gameStates;
+  // Services (assumed to be lightweight singletons or stateless)
+  private final ResultService resultService = new ResultService();
+  private final UserService userService = new UserService();
+  private final EventsService eventsService = new EventsService();
 
-  private final ResultService resultService;
-  private final UserService userService;
-  private final EventsService eventsService;
-
-  public GameSocketsServer(int port) {
-    super(new InetSocketAddress(port));
-    resultService = new ResultService();
-    userService = new UserService();
-    eventsService = new EventsService();
-    gameStates = new ConcurrentHashMap<>();
+  public SocketsService() {
+    // Register Jackson module for JDK8 support
     objectMapper.registerModule(new Jdk8Module());
   }
 
   @Override
-  public void onOpen(WebSocket webSocket, ClientHandshake clientHandshake) {
-    LOG.info("Oh shit, what's good {}", webSocket.getRemoteSocketAddress());
+  public void onConnect(WebSocket socket) {
+    LOG.info("WebSocket connected. Hi.");
+    super.onConnect(socket);
   }
 
   @Override
-  public void onClose(WebSocket webSocket, int code, String reason, boolean remote) {
-    LOG.info("Connection closed. Code: {}, reason: {}", code, reason);
-    for (GameState gameState : gameStates.values()) {
-      if (gameState.getWebSockets().contains(webSocket)) {
+  public void onClose(WebSocket socket, DataFrame frame) {
+    LOG.info("WebSocket closed. DataFrame: {}", frame);
+    // Remove the socket from any game state that contains it
+    gameStates.values().forEach(gameState -> {
+      if (gameState.getWebSockets().contains(socket)) {
         gameStates.remove(gameState.getGameCode());
       }
-    }
-    webSocket.close();
+    });
+    super.onClose(socket, frame);
   }
 
   @Override
-  public void onMessage(WebSocket webSocket, String message) {
+  public void onMessage(WebSocket socket, String message) {
+    LOG.info("Message received: {}", message);
     GameEvent gameEvent;
     try {
       gameEvent = objectMapper.readValue(message, GameEvent.class);
     } catch (JsonProcessingException e) {
-      LOG.error("What the fuck am I supposed to do with {}", message, e);
+      LOG.error("Failed to parse message: {}", message, e);
       throw new RuntimeException(e);
     }
     switch (gameEvent.getEventType()) {
-      case PLAYER_JOINED -> handleJoin(gameEvent, webSocket);
+      case PLAYER_JOINED -> handleJoin(gameEvent, socket);
       case GUESS -> handleGuess(gameEvent);
       case ROUND_START -> handleRoundStart(gameEvent);
       case REMATCH -> handleRematch(gameEvent);
       case PLAYER_LEFT -> handleGameExit(gameEvent);
       case REMATCH_PROPOSAL -> handleRematchProposal(gameEvent);
+      default -> LOG.warn("Unhandled event type: {}", gameEvent.getEventType());
     }
   }
 
+  @Override
+  public boolean onError(WebSocket socket, Throwable t) {
+    LOG.error("NOOOOOOOOOOOOOOOO!!!! WebSocket error on {}: ", socket, t);
+    return false;
+  }
+
+
+  // --- Private helper methods below ---
   private void handleRematchProposal(GameEvent gameEvent) {
     GameState gameState = gameStates.get(gameEvent.getGameCode());
     if (gameState.getCurrentState().equals(CurrentGameState.REMATCH_PROPOSED)) {
@@ -95,8 +102,8 @@ public class GameSocketsServer extends WebSocketServer {
   private void handleRematch(GameEvent gameEvent) {
     GameState gameState = gameStates.get(gameEvent.getGameCode());
     gameState.setCurrentGuesses(new HashMap<>());
-    HashMap<Long, Integer> resetScores = new HashMap<>();
-    for (Map.Entry<Long, Integer> score : gameState.getPlayerScores().entrySet()) {
+    HashMap<String, Integer> resetScores = new HashMap<>();
+    for (Map.Entry<String, Integer> score : gameState.getPlayerScores().entrySet()) {
       resetScores.put(score.getKey(), 0);
     }
     gameState.setPlayerScores(resetScores);
@@ -107,60 +114,50 @@ public class GameSocketsServer extends WebSocketServer {
   private void handleRoundStart(GameEvent roundStartEvent) {
     LOG.info("Round start event received: {}", roundStartEvent);
     if (!roundStartEvent.getEventType().equals(GameEventType.ROUND_START)) {
-      LOG.error("Event must be ROUND_START, but it was {}", roundStartEvent.getEventType());
+      LOG.error("Expected ROUND_START event, but got: {}", roundStartEvent.getEventType());
     }
-
     GameState gameState = gameStates.get(roundStartEvent.getGameCode());
-
     if (gameState.getCurrentState().equals(CurrentGameState.WAITING_FOR_GUESSES) || gameState.getCurrentState().equals(CurrentGameState.TIMER_START)) {
-      LOG.info("Game with code {} already waiting for guesses, not refreshing event.", roundStartEvent.getGameCode());
+      LOG.info("Game {} already waiting for guesses.", roundStartEvent.getGameCode());
       return;
     }
-
     gameState.setCurrentGuesses(new HashMap<>());
     gameState.setCurrentEvent(Optional.of(eventsService.getRandomEvent()));
     gameState.setCurrentState(CurrentGameState.WAITING_FOR_GUESSES);
     broadcastGameState(gameState);
   }
 
-  private void handleJoin(GameEvent joinEvent, WebSocket webSocket) {
+  private void handleJoin(GameEvent joinEvent, WebSocket socket) {
     String gameCode = joinEvent.getGameCode();
     if (!gameStates.containsKey(gameCode)) {
-      createInitialGameState(joinEvent, webSocket);
+      createInitialGameState(joinEvent, socket);
     } else {
-      addUserToExistingGame(joinEvent, webSocket);
+      addUserToExistingGame(joinEvent, socket);
     }
     GameState gameState = gameStates.get(gameCode);
-    gameState.getWebSockets().add(webSocket);
+    gameState.getWebSockets().add(socket);
   }
 
-  private void createInitialGameState(GameEvent joinEvent, WebSocket webSocket) {
+  private void createInitialGameState(GameEvent joinEvent, WebSocket socket) {
     GameState initialGameState = new GameState();
     initialGameState.setGameCode(joinEvent.getGameCode());
     initialGameState.addUserToGame(joinEvent.getUser());
     initialGameState.setCurrentState(CurrentGameState.WAITING_FOR_PLAYERS);
-    initialGameState.getWebSockets().add(webSocket);
+    initialGameState.getWebSockets().add(socket);
     gameStates.put(joinEvent.getGameCode(), initialGameState);
     broadcastGameState(initialGameState);
     LOG.info("Game {} created with user {}", joinEvent.getGameCode(), joinEvent.getUser());
   }
 
-  private void addUserToExistingGame(GameEvent joinEvent, WebSocket webSocket) {
+  private void addUserToExistingGame(GameEvent joinEvent, WebSocket socket) {
     GameState existingGame = gameStates.get(joinEvent.getGameCode());
     existingGame.addUserToGame(joinEvent.getUser());
-
     if (existingGame.getUsers().size() == NUM_PLAYERS_PER_GAME) {
       existingGame.setCurrentState(CurrentGameState.GAME_START);
     }
-    existingGame.getWebSockets().add(webSocket);
+    existingGame.getWebSockets().add(socket);
     broadcastGameState(existingGame);
     LOG.info("User {} joined game {}", joinEvent.getUser(), joinEvent.getGameCode());
-    LOG.info("Game state: {}", existingGame);
-  }
-
-  @Override
-  public void onError(WebSocket webSocket, Exception e) {
-    LOG.error("NOOOOOOOOOOOOOOOOO, {} messed up.", webSocket.getRemoteSocketAddress(), e);
   }
 
   private void handleGuess(GameEvent guessEvent) {
@@ -185,7 +182,7 @@ public class GameSocketsServer extends WebSocketServer {
     }
   }
 
-  private Optional<Long> getRoundWinnerId(GameState gameState) {
+  private Optional<String> getRoundWinnerId(GameState gameState) {
     // Get the correct answer for this round
     HistoricalEvent currentRoundEvent = gameState.getCurrentEvent().orElseThrow(() -> new RuntimeException("No event found for this round."));
     int correctYear = currentRoundEvent.getYear();
@@ -199,11 +196,11 @@ public class GameSocketsServer extends WebSocketServer {
     // have the same distance, we use the earliest guess timestamp.
     int bestDistance = Integer.MAX_VALUE;
     long earliestTimestamp = Long.MAX_VALUE;
-    Long bestUserId = null;
+    String bestUserId = null;
 
     // Iterate through each guess
-    for (Map.Entry<Long, GuessMeta> entry : gameState.getCurrentGuesses().entrySet().stream().filter(e -> e.getValue().getGuess().isPresent()).toList()) {
-      Long userId = entry.getKey();
+    for (Map.Entry<String, GuessMeta> entry : gameState.getCurrentGuesses().entrySet().stream().filter(e -> e.getValue().getGuess().isPresent()).toList()) {
+      String userId = entry.getKey();
       GuessMeta guessMeta = entry.getValue();
 
       int guessValue = guessMeta.getGuess().orElseThrow();
@@ -229,9 +226,8 @@ public class GameSocketsServer extends WebSocketServer {
     return Optional.ofNullable(bestUserId);
   }
 
-
   private void completeRound(GameState gameState, GameEvent guessEvent) {
-    Optional<Long> maybeWinnerId = getRoundWinnerId(gameState);
+    Optional<String> maybeWinnerId = getRoundWinnerId(gameState);
     maybeWinnerId.ifPresent(winnerId -> {
       int winnerNewScore = gameState.getPlayerScores().get(winnerId) + 1;
       gameState.getPlayerScores().put(winnerId, winnerNewScore);
@@ -244,7 +240,7 @@ public class GameSocketsServer extends WebSocketServer {
     });
   }
 
-  private void completeGame(GameState gameState, Long winnerId) {
+  private void completeGame(GameState gameState, String winnerId) {
     gameState.getUsers().forEach(user -> {
       if (user.getId().equals(winnerId)) {
         user.setWins(user.getWins() + 1);
@@ -260,24 +256,16 @@ public class GameSocketsServer extends WebSocketServer {
     resultService.persistResult(gameState);
   }
 
-
-  @Override
-  public void onStart() {
-    LOG.info("We out here. Server started on port {}", getPort());
-    setConnectionLostTimeout(0);
-    setConnectionLostTimeout(30);
-    setReuseAddr(true);
-  }
-
   private void broadcastGameState(GameState gameState) {
     try {
+      String json = objectMapper.writeValueAsString(gameState);
       for (WebSocket socket : gameState.getWebSockets()) {
-        if (socket.isOpen()) {
-          socket.send(objectMapper.writeValueAsString(gameState));
+        if (socket.isConnected()) {
+          socket.send(json);
         }
       }
     } catch (JsonProcessingException e) {
-      LOG.error("NOOOOOOOOOOOOOOOOO. Failed to broadcast game state", e);
+      LOG.error("Failed to broadcast game state", e);
     }
   }
 }

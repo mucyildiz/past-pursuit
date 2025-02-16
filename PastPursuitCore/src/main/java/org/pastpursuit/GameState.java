@@ -3,7 +3,7 @@ package org.pastpursuit;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
-import org.java_websocket.WebSocket;
+import org.glassfish.grizzly.websockets.WebSocket;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,10 +15,10 @@ import java.util.Set;
 public class GameState {
   @JsonIgnore
   Set<WebSocket> webSockets = new HashSet<>();
-  
+
   Set<User> users = new HashSet<>();
-  HashMap<Long, Integer> playerScores = new HashMap<>();
-  HashMap<Long, GuessMeta> currentGuesses = new HashMap<>();
+  HashMap<String, Integer> playerScores = new HashMap<>();
+  HashMap<String, GuessMeta> currentGuesses = new HashMap<>();
   CurrentGameState currentState;
   String gameCode;
   Optional<HistoricalEvent> currentEvent = Optional.empty();

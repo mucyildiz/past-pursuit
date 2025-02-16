@@ -36,6 +36,11 @@
             <version>1.6.0</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>org.glassfish.grizzly</groupId>
+            <artifactId>grizzly-websockets</artifactId>
+            <version>4.0.2</version>
+        </dependency>
 
     </dependencies>
 

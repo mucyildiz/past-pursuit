@@ -1,34 +1,42 @@
 package org.pastpursuit;
 
 import org.glassfish.grizzly.http.server.HttpServer;
+import org.glassfish.grizzly.http.server.NetworkListener;
+import org.glassfish.grizzly.websockets.WebSocketAddOn;
+import org.glassfish.grizzly.websockets.WebSocketEngine;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
-import org.pastpursuit.services.GameSocketsServer;
+import org.pastpursuit.services.SocketsService;
 
 import java.net.URI;
 import java.util.logging.Logger;
 
 public class Resource {
   private static final Logger LOG = Logger.getLogger(Resource.class.getName());
-  public static final String BASE_URI = "http://localhost:8080/";
+  // Run the HTTP server on port 8080 (both REST API and WebSocket will share this port)
+  public static final String BASE_URI = "http://0.0.0.0:8080/api";
 
-  public static HttpServer startServer() {
-    final ResourceConfig rc = new ResourceConfig().packages("org.pastpursuit.services") // Register package with REST endpoints
-            .register(new org.glassfish.jersey.jackson.JacksonFeature()); // Enable Jackson for JSON
+  public static void main(String[] args) {
+    final ResourceConfig rc = new ResourceConfig().packages("org.pastpursuit.services").register(new org.glassfish.jersey.jackson.JacksonFeature());
+    final HttpServer server = GrizzlyHttpServerFactory.createHttpServer(URI.create(BASE_URI), rc, false);
 
-    return GrizzlyHttpServerFactory.createHttpServer(URI.create(BASE_URI), rc);
-  }
+    WebSocketAddOn webSocketAddOn = new WebSocketAddOn();
+    for (NetworkListener l : server.getListeners()) {
+      l.registerAddOn(webSocketAddOn);
+    }
 
-  public static void main(String[] args) throws InterruptedException {
-    final HttpServer server = startServer();
-    int port = 8081;
-    GameSocketsServer socketsServer = new GameSocketsServer(port);
-    socketsServer.start();
-    LOG.info("Websocket server started at ws://localhost:" + port);
+    // Clients will connect to ws://<host>:8080/ws
+    WebSocketEngine.getEngine().register("", "/", new SocketsService());
 
-    LOG.info("Jersey server started at " + BASE_URI);
+    LOG.info("Jersey (REST) server started at " + BASE_URI);
+    LOG.info("WebSocket server started at ws://0.0.0.0:8080/ws");
     LOG.info("Press Ctrl+C to stop...");
-    Runtime.getRuntime().addShutdownHook(new Thread(server::shutdownNow));
-    Thread.currentThread().join();
+    try {
+      server.start();
+    } catch (Exception e) {
+      e.printStackTrace();
+      LOG.severe(e.getMessage());
+      server.shutdownNow();
+    }
   }
 }

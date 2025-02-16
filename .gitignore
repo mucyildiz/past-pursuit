@@ -36,7 +36,3 @@ build/
 
 ### Mac OS ###
 .DS_Store
-
-PastPursuitApi/src/main/resources/config.properties
-PastPursuitData/src/main/resources/META-INF/persistence.xml
-PastPursuitData/src/test/resources/application.properties

@@ -1,26 +1,25 @@
 package org.pastpursuit;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.*;
-
-@Entity
-@Table(name = "results")
 @Getter
 @Setter
 public class GameResult {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+  private String userId;
 
-  private Long userId;
+  private String opponentId;
 
-  @Enumerated(EnumType.ORDINAL)
-  private MatchResult matchResult;
+  private Result result;
 
-  public enum MatchResult {
+  public enum Result {
     WIN, LOSS
+  }
+
+  @JsonIgnore
+  public String getPartitionKey() {
+    return String.format("RESULT#%s#%s", userId, opponentId);
   }
 }

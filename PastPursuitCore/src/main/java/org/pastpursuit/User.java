@@ -1,24 +1,20 @@
 package org.pastpursuit;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.*;
 import java.util.Objects;
 
-@Entity
-@Table(name = "users")
 @Getter
 @Setter
 public class User {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+  private String id;
 
   private String name;
 
-  private String password;
+  private String email;
 
   private Integer wins;
 
@@ -46,5 +42,10 @@ public class User {
       return Objects.hash(getName());
     }
     return Objects.hash(getId());
+  }
+
+  @JsonIgnore
+  public String getPartitionKey() {
+    return String.format("USER#%s", id);
   }
 }
