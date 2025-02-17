@@ -23,17 +23,14 @@ public class SocketsService extends WebSocketApplication {
   private static final int WINNING_SCORE = 4;
 
   private final ObjectMapper objectMapper = new ObjectMapper();
-  // Game state stored in a concurrent map
-  private final ConcurrentHashMap<String, GameState> gameStates =
-    new ConcurrentHashMap<>();
 
-  // Services (assumed to be lightweight singletons or stateless)
-  private final ResultService resultService = new ResultService();
-  private final UserService userService = new UserService();
-  private final EventsService eventsService = new EventsService();
+  private final ConcurrentHashMap<String, GameState> gameStates = new ConcurrentHashMap<>();
+
+  private static final ResultService resultService = new ResultService();
+  private static final UserService userService = new UserService();
+  private static final EventsService eventsService = new EventsService();
 
   public SocketsService() {
-    // Register Jackson module for JDK8 support
     objectMapper.registerModule(new Jdk8Module());
   }
 
@@ -197,23 +194,17 @@ public class SocketsService extends WebSocketApplication {
   private Optional<String> getRoundWinnerId(GameState gameState) {
     // Get the correct answer for this round
     HistoricalEvent currentRoundEvent = gameState.getCurrentEvent()
-      .orElseThrow(() -> new RuntimeException("No event found for this round" +
-        "."));
+      .orElseThrow(() -> new RuntimeException("No event found for this round."));
     int correctYear = currentRoundEvent.getYear();
-
-    // Validate that all players have made a guess before proceeding
     if (gameState.getCurrentGuesses().size() != NUM_PLAYERS_PER_GAME) {
-      throw new RuntimeException("Not all guesses are in yet. This shouldn't " +
-        "be called at this time.");
+      throw new RuntimeException("Not all guesses are in yet. " +
+        "This shouldn't be called at this time.");
     }
 
-    // We'll keep track of the best (smallest) distance. If multiple guesses
-    // have the same distance, we use the earliest guess timestamp.
     int bestDistance = Integer.MAX_VALUE;
     long earliestTimestamp = Long.MAX_VALUE;
     String bestUserId = null;
 
-    // Iterate through each guess
     for (Map.Entry<String, GuessMeta> entry : gameState.getCurrentGuesses()
       .entrySet().stream()
       .filter(e -> e.getValue().getGuess().isPresent()).toList()) {
@@ -223,12 +214,8 @@ public class SocketsService extends WebSocketApplication {
       int guessValue = guessMeta.getGuess().orElseThrow();
       long guessTimestamp = guessMeta.getTimestamp();
 
-      // Calculate how far off this guess is from the correctYear
       int currentDistance = Math.abs(guessValue - correctYear);
-
-      // Compare with the best distance so far
       if (currentDistance < bestDistance) {
-        // This guess is closer than any previous guess
         bestDistance = currentDistance;
         earliestTimestamp = guessTimestamp;
         bestUserId = userId;
@@ -239,7 +226,6 @@ public class SocketsService extends WebSocketApplication {
 
     }
 
-    // Return the userId of the winning guess if it exists
     return Optional.ofNullable(bestUserId);
   }
 

@@ -17,7 +17,7 @@ import java.util.UUID;
 @Consumes(MediaType.APPLICATION_JSON)
 public class UserService {
   private final Logger LOG = LoggerFactory.getLogger(UserService.class);
-  private final UserRepository userRepository = new UserRepository();
+  private static final UserRepository userRepository = new UserRepository();
 
   @GET
   @Path("health")
@@ -36,7 +36,8 @@ public class UserService {
       .setLosses(0).build();
 
     User createdUser = userRepository.save(newUser);
-    Response.ResponseBuilder response = Response.status(Response.Status.CREATED).entity(createdUser);
+    Response.ResponseBuilder response = Response.status(Response.Status.CREATED)
+      .entity(createdUser);
 
     response.header("Access-Control-Allow-Origin", "https://pastpursuit.io");
     response.header("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE, HEAD");

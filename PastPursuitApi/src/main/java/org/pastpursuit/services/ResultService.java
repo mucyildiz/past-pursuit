@@ -11,7 +11,7 @@ import org.pastpursuit.*;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class ResultService {
-  private final ResultRepository resultRepository = new ResultRepository();
+  private static final ResultRepository resultRepository = new ResultRepository();
 
   @POST
   public void persistResult(GameState gameState) {
