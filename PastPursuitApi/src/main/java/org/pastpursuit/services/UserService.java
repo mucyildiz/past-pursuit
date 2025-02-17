@@ -41,10 +41,11 @@ public class UserService {
     Response.ResponseBuilder response = Response.status(Response.Status.CREATED)
       .entity(createdUser);
 
-    String localOrigin = System.getenv("USE_LOCAL_ORIGIN");
-    String origin = localOrigin != null ?
+    boolean useLocalOrigin = System.getenv("USE_LOCAL_ORIGIN") != null;
+    String origin = useLocalOrigin ?
                     "http://localhost:5173" :
                     "https://pastpursuit.io";
+    LOG.info("Setting Access-Control-Allow-Origin to: {}", origin);
 
     response.header("Access-Control-Allow-Origin", origin);
     response.header("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE, HEAD");
@@ -59,10 +60,11 @@ public class UserService {
   public Response handleOptions() {
     LOG.info("Handling OPTIONS request");
     Response.ResponseBuilder response = Response.ok();
-    String localOrigin = System.getenv("USE_LOCAL_ORIGIN");
-    String origin = localOrigin != null ?
+    boolean useLocalOrigin = System.getenv("USE_LOCAL_ORIGIN") != null;
+    String origin = useLocalOrigin ?
                     "http://localhost:5173" :
                     "https://pastpursuit.io";
+    LOG.info("Setting Access-Control-Allow-Origin to: {}", origin);
 
     response.header("Access-Control-Allow-Origin", origin);
     response.header("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE, HEAD");

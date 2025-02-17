@@ -9,6 +9,7 @@ import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 @Value.Immutable
 @Value.Style(init = "set*")
@@ -20,7 +21,8 @@ public abstract class User implements DynamoDbRow {
 
   public abstract String getName();
 
-  public abstract String getEmail();
+  // TODO: refactor this, we only need email for the login flow, not for the user object
+  public abstract Optional<String> getEmail();
 
   public abstract Integer getWins();
 
@@ -55,13 +57,12 @@ public abstract class User implements DynamoDbRow {
   }
 
   @JsonIgnore
-  @Value.Derived
   public Map<String, AttributeValue> getDynamoDbRow() {
     Map<String, AttributeValue> row = new HashMap<>();
     row.put("pp_partition_key", AttributeValue.builder()
       .s(getPartitionKey()).build());
     row.put("name", AttributeValue.fromS(getName()));
-    row.put("email", AttributeValue.fromS(getEmail()));
+    row.put("email", AttributeValue.fromS(getEmail().orElseThrow()));
     row.put("wins", AttributeValue.fromN(String.valueOf(getWins())));
     row.put("losses", AttributeValue.fromN(String.valueOf(getLosses())));
     return row;

@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.immutables.value.Value;
 
+import java.util.Optional;
+
 @Value.Immutable
 @Value.Style(init = "set*")
 @JsonDeserialize(as = ImmutableGameEvent.class)
@@ -13,9 +15,9 @@ public interface GameEvent {
 
   ImmutableUser getUser();
 
-  String getData();
+  Optional<String> getData();
 
   String getGameCode();
 
-  long getTimestamp();
+  Optional<Long> getTimestamp();
 }

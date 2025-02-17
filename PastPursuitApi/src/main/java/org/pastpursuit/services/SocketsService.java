@@ -73,7 +73,7 @@ public class SocketsService extends WebSocketApplication {
       LOG.error("Failed to parse message: {}", message, e);
       throw new RuntimeException(e);
     }
-    
+
     switch (gameEvent.getEventType()) {
       case PLAYER_JOINED -> handleJoin(gameEvent, socket);
       case GUESS -> handleGuess(gameEvent);
@@ -180,13 +180,15 @@ public class SocketsService extends WebSocketApplication {
 
   private void handleGuess(GameEvent guessEvent) {
     ImmutableGuessMeta.Builder guessMetaBuilder = ImmutableGuessMeta.builder()
-      .setTimestamp(guessEvent.getTimestamp());
+      .setTimestamp(guessEvent.getTimestamp().orElse(0L));
 
     // this happens if someone ran out of time
-    if (Strings.isNullOrEmpty(guessEvent.getData())) {
+    if (guessEvent.getData()
+      .isEmpty() || Strings.isNullOrEmpty(guessEvent.getData().get())) {
       guessMetaBuilder.setGuess(Optional.empty());
     } else {
-      guessMetaBuilder.setGuess(Optional.of(Integer.parseInt(guessEvent.getData())));
+      guessMetaBuilder.setGuess(Optional.of(Integer.parseInt(guessEvent.getData()
+        .get())));
     }
 
     GameState gameState = gameStates.get(guessEvent.getGameCode());

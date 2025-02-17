@@ -22,6 +22,9 @@ public class UserRepository {
   }
 
   public ImmutableUser save(ImmutableUser user) {
+    if (user.getEmail().isEmpty()) {
+      throw new IllegalArgumentException("User email is required for saving in the database");
+    }
     PutItemRequest putItemRequest = PutItemRequest.builder()
       .tableName(DynamoDbProvider.DB_NAME)
       .item(user.getDynamoDbRow())
@@ -49,7 +52,7 @@ public class UserRepository {
     if (queryResponse.count() > 1) {
       LOG.error("Multiple users found with email: {}", email);
     }
-    
+
     Map<String, AttributeValue> ddbRow = queryResponse.items().getFirst();
     return Optional.of(User.fromDynamoDbRow(ddbRow));
   }
