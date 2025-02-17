@@ -2,6 +2,7 @@ package org.pastpursuit.services;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeRequestUrl;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
@@ -25,6 +26,8 @@ import java.util.Optional;
 @Path("/auth/google")
 public class GoogleAuthService {
   private static final Logger LOG = LoggerFactory.getLogger(GoogleAuthService.class);
+  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
+    .registerModule(new Jdk8Module());
   private static final String CLIENT_ID = "592653308145-kko8ckgfnfckcjl1d5lfa0h7kmghdr4l.apps.googleusercontent.com";
   private static final String REDIRECT_URI = "https://api.pastpursuit.io/api/auth/google/callback";
   public static final UserService userService = new UserService();
@@ -88,7 +91,7 @@ public class GoogleAuthService {
               window.close();
           </script>
           """,
-        new ObjectMapper().writeValueAsString(user.get()),
+        OBJECT_MAPPER.writeValueAsString(user.get()),
         "https://pastpursuit.io"
       );
       return Response.ok(script)
