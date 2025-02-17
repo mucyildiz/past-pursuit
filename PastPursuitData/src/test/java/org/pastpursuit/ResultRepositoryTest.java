@@ -6,9 +6,7 @@ import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 import java.util.Map;
 import java.util.UUID;
 
-public class ResultRepositoryTest {
-
-
+class ResultRepositoryTest {
   private final ResultRepository resultRepository = new ResultRepository();
 
   @Test

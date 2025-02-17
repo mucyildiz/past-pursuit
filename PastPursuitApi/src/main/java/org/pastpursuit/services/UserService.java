@@ -10,6 +10,7 @@ import org.pastpursuit.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Path("past-pursuit/users")
@@ -31,15 +32,21 @@ public class UserService {
     ImmutableUser newUser = ImmutableUser.builder()
       .setId(UUID.randomUUID().toString())
       .setName(user.getName())
-      .setEmail("placeholder@email.com")
+      .setEmail(user.getEmail())
       .setWins(0)
-      .setLosses(0).build();
+      .setLosses(0)
+      .build();
 
     User createdUser = userRepository.save(newUser);
     Response.ResponseBuilder response = Response.status(Response.Status.CREATED)
       .entity(createdUser);
 
-    response.header("Access-Control-Allow-Origin", "https://pastpursuit.io");
+    String localOrigin = System.getenv("USE_LOCAL_ORIGIN");
+    String origin = localOrigin != null ?
+                    "http://localhost:5173" :
+                    "https://pastpursuit.io";
+
+    response.header("Access-Control-Allow-Origin", origin);
     response.header("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE, HEAD");
     response.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
     response.header("Access-Control-Allow-Credentials", "true");
@@ -52,7 +59,12 @@ public class UserService {
   public Response handleOptions() {
     LOG.info("Handling OPTIONS request");
     Response.ResponseBuilder response = Response.ok();
-    response.header("Access-Control-Allow-Origin", "https://pastpursuit.io");
+    String localOrigin = System.getenv("USE_LOCAL_ORIGIN");
+    String origin = localOrigin != null ?
+                    "http://localhost:5173" :
+                    "https://pastpursuit.io";
+
+    response.header("Access-Control-Allow-Origin", origin);
     response.header("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE, HEAD");
     response.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
     response.header("Access-Control-Allow-Credentials", "true");
@@ -63,5 +75,9 @@ public class UserService {
 
   public void updateUser(ImmutableUser user) {
     userRepository.save(user);
+  }
+
+  public Optional<ImmutableUser> getByEmail(String email) {
+    return userRepository.getByEmail(email);
   }
 }

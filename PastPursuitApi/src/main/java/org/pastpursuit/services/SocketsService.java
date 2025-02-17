@@ -35,6 +35,12 @@ public class SocketsService extends WebSocketApplication {
   }
 
   @Override
+  public void onPing(WebSocket socket, byte[] payload) {
+    LOG.info("Ping received from {}", socket);
+    super.onPing(socket, payload);
+  }
+
+  @Override
   public void onConnect(WebSocket socket) {
     LOG.info("WebSocket connected. Hi.");
     super.onConnect(socket);
@@ -55,6 +61,11 @@ public class SocketsService extends WebSocketApplication {
   @Override
   public void onMessage(WebSocket socket, String message) {
     LOG.info("Message received: {}", message);
+    if (message.equals("PING")) {
+      socket.send("PONG");
+      return;
+    }
+
     GameEvent gameEvent;
     try {
       gameEvent = objectMapper.readValue(message, GameEvent.class);
@@ -62,6 +73,7 @@ public class SocketsService extends WebSocketApplication {
       LOG.error("Failed to parse message: {}", message, e);
       throw new RuntimeException(e);
     }
+    
     switch (gameEvent.getEventType()) {
       case PLAYER_JOINED -> handleJoin(gameEvent, socket);
       case GUESS -> handleGuess(gameEvent);

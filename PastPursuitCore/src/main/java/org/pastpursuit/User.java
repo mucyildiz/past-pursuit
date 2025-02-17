@@ -62,4 +62,15 @@ public abstract class User implements DynamoDbRow {
     row.put("losses", AttributeValue.fromN(String.valueOf(getLosses())));
     return row;
   }
+
+  @JsonIgnore
+  public static ImmutableUser fromDynamoDbRow(Map<String, AttributeValue> ddbRow) {
+    return ImmutableUser.builder()
+      .setId(ddbRow.get("pp_partition_key").s().replace("USER#", ""))
+      .setName(ddbRow.get("name").s())
+      .setEmail(ddbRow.get("email").s())
+      .setWins(Integer.parseInt(ddbRow.get("wins").n()))
+      .setLosses(Integer.parseInt(ddbRow.get("losses").n()))
+      .build();
+  }
 }

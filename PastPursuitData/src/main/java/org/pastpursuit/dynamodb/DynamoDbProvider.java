@@ -18,11 +18,11 @@ public class DynamoDbProvider {
 
   public static DynamoDbClient getClient() {
     if (client == null) {
-      String localEndpoint = System.getenv("LOCAL_DYNAMODB_ENDPOINT");
       DynamoDbClientBuilder builder = DynamoDbClient.builder()
         .region(Region.US_EAST_2)
         .credentialsProvider(DefaultCredentialsProvider.create());
 
+      String localEndpoint = System.getenv("LOCAL_DYNAMODB_ENDPOINT");
       if (localEndpoint != null && !localEndpoint.isEmpty()) {
         builder.endpointOverride(URI.create(localEndpoint));
       }
