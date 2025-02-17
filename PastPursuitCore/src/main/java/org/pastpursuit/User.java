@@ -1,6 +1,8 @@
 package org.pastpursuit;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.immutables.value.Value;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 
@@ -10,6 +12,8 @@ import java.util.Objects;
 
 @Value.Immutable
 @Value.Style(init = "set*")
+@JsonSerialize(as = ImmutableUser.class)
+@JsonDeserialize(as = ImmutableUser.class)
 public abstract class User implements DynamoDbRow {
 
   public abstract String getId();
