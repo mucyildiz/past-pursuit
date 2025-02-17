@@ -1,7 +1,7 @@
 <component name="ProjectCodeStyleConfiguration">
   <code_scheme name="Project" version="173">
     <codeStyleSettings language="JAVA">
-      <option name="RIGHT_MARGIN" value="120" />
+      <option name="RIGHT_MARGIN" value="80" />
       <option name="ALIGN_MULTILINE_PARAMETERS" value="false" />
       <option name="ALIGN_MULTILINE_FOR" value="false" />
       <option name="ALIGN_MULTILINE_ASSIGNMENT" value="true" />

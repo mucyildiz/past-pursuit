@@ -17,13 +17,15 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class SocketsService extends WebSocketApplication {
-  private static final Logger LOG = LoggerFactory.getLogger(SocketsService.class);
+  private static final Logger LOG =
+    LoggerFactory.getLogger(SocketsService.class);
   private static final int NUM_PLAYERS_PER_GAME = 2;
   private static final int WINNING_SCORE = 4;
 
   private final ObjectMapper objectMapper = new ObjectMapper();
   // Game state stored in a concurrent map
-  private final ConcurrentHashMap<String, GameState> gameStates = new ConcurrentHashMap<>();
+  private final ConcurrentHashMap<String, GameState> gameStates =
+    new ConcurrentHashMap<>();
 
   // Services (assumed to be lightweight singletons or stateless)
   private final ResultService resultService = new ResultService();
@@ -103,7 +105,8 @@ public class SocketsService extends WebSocketApplication {
     GameState gameState = gameStates.get(gameEvent.getGameCode());
     gameState.setCurrentGuesses(new HashMap<>());
     HashMap<String, Integer> resetScores = new HashMap<>();
-    for (Map.Entry<String, Integer> score : gameState.getPlayerScores().entrySet()) {
+    for (Map.Entry<String, Integer> score : gameState.getPlayerScores()
+      .entrySet()) {
       resetScores.put(score.getKey(), 0);
     }
     gameState.setPlayerScores(resetScores);
@@ -114,12 +117,15 @@ public class SocketsService extends WebSocketApplication {
   private void handleRoundStart(GameEvent roundStartEvent) {
     LOG.info("Round start event received: {}", roundStartEvent);
     if (!roundStartEvent.getEventType().equals(GameEventType.ROUND_START)) {
-      LOG.error("Expected ROUND_START event, but got: {}", roundStartEvent.getEventType());
+      LOG.error("Expected ROUND_START event, but got: {}",
+        roundStartEvent.getEventType());
     }
     GameState gameState = gameStates.get(roundStartEvent.getGameCode());
-    if (gameState.getCurrentState().equals(CurrentGameState.WAITING_FOR_GUESSES) || gameState.getCurrentState()
+    if (gameState.getCurrentState()
+      .equals(CurrentGameState.WAITING_FOR_GUESSES) || gameState.getCurrentState()
       .equals(CurrentGameState.TIMER_START)) {
-      LOG.info("Game {} already waiting for guesses.", roundStartEvent.getGameCode());
+      LOG.info("Game {} already waiting for guesses.",
+        roundStartEvent.getGameCode());
       return;
     }
     gameState.setCurrentGuesses(new HashMap<>());
@@ -147,7 +153,8 @@ public class SocketsService extends WebSocketApplication {
     initialGameState.getWebSockets().add(socket);
     gameStates.put(joinEvent.getGameCode(), initialGameState);
     broadcastGameState(initialGameState);
-    LOG.info("Game {} created with user {}", joinEvent.getGameCode(), joinEvent.getUser());
+    LOG.info("Game {} created with user {}", joinEvent.getGameCode(),
+      joinEvent.getUser());
   }
 
   private void addUserToExistingGame(GameEvent joinEvent, WebSocket socket) {
@@ -158,23 +165,27 @@ public class SocketsService extends WebSocketApplication {
     }
     existingGame.getWebSockets().add(socket);
     broadcastGameState(existingGame);
-    LOG.info("User {} joined game {}", joinEvent.getUser(), joinEvent.getGameCode());
+    LOG.info("User {} joined game {}", joinEvent.getUser(),
+      joinEvent.getGameCode());
   }
 
   private void handleGuess(GameEvent guessEvent) {
-    GuessMeta guessMeta = new GuessMeta();
+    ImmutableGuessMeta.Builder guessMetaBuilder = ImmutableGuessMeta.builder()
+      .setTimestamp(guessEvent.getTimestamp());
+
     // this happens if someone ran out of time
     if (Strings.isNullOrEmpty(guessEvent.getData())) {
-      guessMeta.setGuess(Optional.empty());
+      guessMetaBuilder.setGuess(Optional.empty());
     } else {
-      guessMeta.setGuess(Optional.of(Integer.parseInt(guessEvent.getData())));
+      guessMetaBuilder.setGuess(Optional.of(Integer.parseInt(guessEvent.getData())));
     }
-    guessMeta.setTimestamp(guessEvent.getTimestamp());
 
     GameState gameState = gameStates.get(guessEvent.getGameCode());
-    gameState.getCurrentGuesses().put(guessEvent.getUser().getId(), guessMeta);
+    gameState.getCurrentGuesses()
+      .put(guessEvent.getUser().getId(), guessMetaBuilder.build());
 
-    boolean allGuessesIn = gameState.getCurrentGuesses().size() == gameState.getUsers().size();
+    boolean allGuessesIn = gameState.getCurrentGuesses()
+      .size() == gameState.getUsers().size();
     if (allGuessesIn) {
       completeRound(gameState, guessEvent);
     } else {
@@ -186,12 +197,14 @@ public class SocketsService extends WebSocketApplication {
   private Optional<String> getRoundWinnerId(GameState gameState) {
     // Get the correct answer for this round
     HistoricalEvent currentRoundEvent = gameState.getCurrentEvent()
-      .orElseThrow(() -> new RuntimeException("No event found for this round."));
+      .orElseThrow(() -> new RuntimeException("No event found for this round" +
+        "."));
     int correctYear = currentRoundEvent.getYear();
 
     // Validate that all players have made a guess before proceeding
     if (gameState.getCurrentGuesses().size() != NUM_PLAYERS_PER_GAME) {
-      throw new RuntimeException("Not all guesses are in yet. This shouldn't be called at this time.");
+      throw new RuntimeException("Not all guesses are in yet. This shouldn't " +
+        "be called at this time.");
     }
 
     // We'll keep track of the best (smallest) distance. If multiple guesses
@@ -201,7 +214,8 @@ public class SocketsService extends WebSocketApplication {
     String bestUserId = null;
 
     // Iterate through each guess
-    for (Map.Entry<String, GuessMeta> entry : gameState.getCurrentGuesses().entrySet().stream()
+    for (Map.Entry<String, GuessMeta> entry : gameState.getCurrentGuesses()
+      .entrySet().stream()
       .filter(e -> e.getValue().getGuess().isPresent()).toList()) {
       String userId = entry.getKey();
       GuessMeta guessMeta = entry.getValue();
