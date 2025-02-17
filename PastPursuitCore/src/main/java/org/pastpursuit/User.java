@@ -2,7 +2,10 @@ package org.pastpursuit;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.immutables.value.Value;
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 @Value.Immutable
@@ -21,8 +24,12 @@ public abstract class User implements DynamoDbRow {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
     User user = (User) o;
     if (getId() == null || user.getId() == null) {
       return Objects.equals(getName(), user.getName());
@@ -41,5 +48,18 @@ public abstract class User implements DynamoDbRow {
   @JsonIgnore
   public String getPartitionKey() {
     return String.format("USER#%s", getId());
+  }
+
+  @JsonIgnore
+  @Value.Derived
+  public Map<String, AttributeValue> getDynamoDbRow() {
+    Map<String, AttributeValue> row = new HashMap<>();
+    row.put("pp_partition_key", AttributeValue.builder()
+      .s(getPartitionKey()).build());
+    row.put("name", AttributeValue.fromS(getName()));
+    row.put("email", AttributeValue.fromS(getEmail()));
+    row.put("wins", AttributeValue.fromN(String.valueOf(getWins())));
+    row.put("losses", AttributeValue.fromN(String.valueOf(getLosses())));
+    return row;
   }
 }
