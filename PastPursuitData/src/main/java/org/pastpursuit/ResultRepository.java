@@ -18,10 +18,6 @@ public class ResultRepository {
     this.dynamoDbClient = DynamoDbProvider.getClient();
   }
 
-  public ResultRepository(DynamoDbClient dynamoDbClient) {
-    this.dynamoDbClient = dynamoDbClient;
-  }
-
   public Map<String, AttributeValue> getResult(String partitionKey) {
     GetItemRequest getItemRequest = GetItemRequest.builder()
       .tableName(DynamoDbProvider.DB_NAME)
