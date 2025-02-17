@@ -1,10 +1,9 @@
 package org.pastpursuit;
 
-import lombok.Getter;
-import lombok.Setter;
+import org.immutables.value.Value;
 
-@Getter
-@Setter
-public class UserCreateRequest {
-  private String name;
+@Value.Immutable
+@Value.Style(init = "set*")
+public interface UserCreateRequest {
+  String getName();
 }

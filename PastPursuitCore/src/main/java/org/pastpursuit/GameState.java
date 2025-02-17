@@ -16,14 +16,14 @@ public class GameState {
   @JsonIgnore
   Set<WebSocket> webSockets = new HashSet<>();
 
-  Set<User> users = new HashSet<>();
+  Set<ImmutableUser> users = new HashSet<>();
   HashMap<String, Integer> playerScores = new HashMap<>();
   HashMap<String, GuessMeta> currentGuesses = new HashMap<>();
   CurrentGameState currentState;
   String gameCode;
   Optional<HistoricalEvent> currentEvent = Optional.empty();
 
-  public void addUserToGame(User user) {
+  public void addUserToGame(ImmutableUser user) {
     users.add(user);
     playerScores.put(user.getId(), 0);
   }

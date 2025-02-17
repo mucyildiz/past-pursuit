@@ -1,13 +1,14 @@
 package org.pastpursuit;
 
-import lombok.Getter;
-import lombok.Setter;
+import org.immutables.value.Value;
 
-@Getter
-@Setter
-public class HistoricalEvent {
-  private Integer year;
-  private Integer month;
-  private Integer day;
-  private String event;
+@Value.Immutable
+public interface HistoricalEvent {
+  Integer getYear();
+
+  Integer getMonth();
+
+  Integer getDay();
+
+  String getEvent();
 }

@@ -14,8 +14,9 @@ public class UserRepository {
     this.dynamoDbClient = DynamoDbProvider.getClient();
   }
 
-  public User save(User user) {
-    PutItemRequest putItemRequest = PutItemRequest.builder().tableName("ppdb").item(Map.of("pp_partition_key", AttributeValue.fromS(user.getPartitionKey()))).build();
+  public ImmutableUser save(ImmutableUser user) {
+    PutItemRequest putItemRequest = PutItemRequest.builder().tableName("ppdb")
+      .item(Map.of("pp_partition_key", AttributeValue.fromS(user.getPartitionKey()))).build();
     dynamoDbClient.putItem(putItemRequest);
     return user;
   }

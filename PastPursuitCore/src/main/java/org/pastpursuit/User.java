@@ -1,29 +1,23 @@
 package org.pastpursuit;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Getter;
-import lombok.Setter;
+import org.immutables.value.Value;
 
 import java.util.Objects;
 
-@Getter
-@Setter
-public class User {
+@Value.Immutable
+@Value.Style(init = "set*")
+public abstract class User implements DynamoDbRow {
 
-  private String id;
+  public abstract String getId();
 
-  private String name;
+  public abstract String getName();
 
-  private String email;
+  public abstract String getEmail();
 
-  private Integer wins;
+  public abstract Integer getWins();
 
-  private Integer losses;
-
-  @Override
-  public String toString() {
-    return "User{" + "id=" + id + ", name='" + name + '\'' + ", wins=" + wins + ", losses=" + losses + '}';
-  }
+  public abstract Integer getLosses();
 
   @Override
   public boolean equals(Object o) {
@@ -33,7 +27,7 @@ public class User {
     if (getId() == null || user.getId() == null) {
       return Objects.equals(getName(), user.getName());
     }
-    return Objects.equals(id, user.id);
+    return Objects.equals(getId(), user.getId());
   }
 
   @Override
@@ -46,6 +40,6 @@ public class User {
 
   @JsonIgnore
   public String getPartitionKey() {
-    return String.format("USER#%s", id);
+    return String.format("USER#%s", getId());
   }
 }

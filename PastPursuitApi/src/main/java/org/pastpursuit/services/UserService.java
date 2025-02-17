@@ -3,6 +3,7 @@ package org.pastpursuit.services;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.pastpursuit.ImmutableUser;
 import org.pastpursuit.User;
 import org.pastpursuit.UserCreateRequest;
 import org.pastpursuit.UserRepository;
@@ -27,14 +28,16 @@ public class UserService {
   @POST
   public Response createUser(UserCreateRequest user) {
     LOG.info("Creating user: {}", user);
-    User newUser = new User();
-    newUser.setId(UUID.randomUUID().toString());
-    newUser.setName(user.getName());
-    newUser.setEmail("placeholder@email.com");
-    newUser.setWins(0);
-    newUser.setLosses(0);
+    ImmutableUser newUser = ImmutableUser.builder()
+      .setId(UUID.randomUUID().toString())
+      .setName(user.getName())
+      .setEmail("placeholder@email.com")
+      .setWins(0)
+      .setLosses(0).build();
+
     User createdUser = userRepository.save(newUser);
     Response.ResponseBuilder response = Response.status(Response.Status.CREATED).entity(createdUser);
+
     response.header("Access-Control-Allow-Origin", "https://pastpursuit.io");
     response.header("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE, HEAD");
     response.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
@@ -57,8 +60,7 @@ public class UserService {
     return response.build();
   }
 
-  public User updateUser(User user) {
+  public void updateUser(ImmutableUser user) {
     userRepository.save(user);
-    return user;
   }
 }

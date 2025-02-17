@@ -1,18 +1,17 @@
 package org.pastpursuit;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Getter;
-import lombok.Setter;
+import org.immutables.value.Value;
 
-@Getter
-@Setter
-public class GameResult {
+@Value.Immutable
+@Value.Style(init = "set*")
+public abstract class GameResult implements DynamoDbRow {
 
-  private String userId;
+  public abstract String getUserId();
 
-  private String opponentId;
+  public abstract String getOpponentId();
 
-  private Result result;
+  public abstract Result getResult();
 
   public enum Result {
     WIN, LOSS
@@ -20,6 +19,6 @@ public class GameResult {
 
   @JsonIgnore
   public String getPartitionKey() {
-    return String.format("RESULT#%s#%s", userId, opponentId);
+    return String.format("RESULT#%s#%s", getUserId(), getOpponentId());
   }
 }

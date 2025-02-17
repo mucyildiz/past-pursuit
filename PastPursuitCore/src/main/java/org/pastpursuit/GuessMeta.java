@@ -1,14 +1,13 @@
 package org.pastpursuit;
 
-import lombok.Getter;
-import lombok.Setter;
+import org.immutables.value.Value;
 
 import java.util.Optional;
 
-@Getter
-@Setter
-public class GuessMeta {
+@Value.Immutable
+public interface GuessMeta {
   // no guess if player ran out of time
-  private Optional<Integer> guess;
-  private long timestamp;
+  Optional<Integer> getGuess();
+
+  long getTimestamp();
 }

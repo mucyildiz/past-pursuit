@@ -1,14 +1,16 @@
 package org.pastpursuit;
 
-import lombok.Getter;
-import lombok.Setter;
+import org.immutables.value.Value;
 
-@Getter
-@Setter
-public class GameEvent {
-  private GameEventType eventType;
-  private User user;
-  private String data;
-  private String gameCode;
-  private long timestamp;
+@Value.Immutable
+public interface GameEvent {
+  GameEventType getEventType();
+
+  ImmutableUser getUser();
+
+  String getData();
+
+  String getGameCode();
+
+  long getTimestamp();
 }

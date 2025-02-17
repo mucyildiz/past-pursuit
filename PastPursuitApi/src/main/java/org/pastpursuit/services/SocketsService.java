@@ -117,7 +117,8 @@ public class SocketsService extends WebSocketApplication {
       LOG.error("Expected ROUND_START event, but got: {}", roundStartEvent.getEventType());
     }
     GameState gameState = gameStates.get(roundStartEvent.getGameCode());
-    if (gameState.getCurrentState().equals(CurrentGameState.WAITING_FOR_GUESSES) || gameState.getCurrentState().equals(CurrentGameState.TIMER_START)) {
+    if (gameState.getCurrentState().equals(CurrentGameState.WAITING_FOR_GUESSES) || gameState.getCurrentState()
+      .equals(CurrentGameState.TIMER_START)) {
       LOG.info("Game {} already waiting for guesses.", roundStartEvent.getGameCode());
       return;
     }
@@ -184,7 +185,8 @@ public class SocketsService extends WebSocketApplication {
 
   private Optional<String> getRoundWinnerId(GameState gameState) {
     // Get the correct answer for this round
-    HistoricalEvent currentRoundEvent = gameState.getCurrentEvent().orElseThrow(() -> new RuntimeException("No event found for this round."));
+    HistoricalEvent currentRoundEvent = gameState.getCurrentEvent()
+      .orElseThrow(() -> new RuntimeException("No event found for this round."));
     int correctYear = currentRoundEvent.getYear();
 
     // Validate that all players have made a guess before proceeding
@@ -199,7 +201,8 @@ public class SocketsService extends WebSocketApplication {
     String bestUserId = null;
 
     // Iterate through each guess
-    for (Map.Entry<String, GuessMeta> entry : gameState.getCurrentGuesses().entrySet().stream().filter(e -> e.getValue().getGuess().isPresent()).toList()) {
+    for (Map.Entry<String, GuessMeta> entry : gameState.getCurrentGuesses().entrySet().stream()
+      .filter(e -> e.getValue().getGuess().isPresent()).toList()) {
       String userId = entry.getKey();
       GuessMeta guessMeta = entry.getValue();
 
@@ -243,11 +246,9 @@ public class SocketsService extends WebSocketApplication {
   private void completeGame(GameState gameState, String winnerId) {
     gameState.getUsers().forEach(user -> {
       if (user.getId().equals(winnerId)) {
-        user.setWins(user.getWins() + 1);
-        userService.updateUser(user);
+        userService.updateUser(user.withWins(user.getWins() + 1));
       } else {
-        user.setLosses(user.getLosses() + 1);
-        userService.updateUser(user);
+        userService.updateUser(user.withLosses(user.getLosses() + 1));
       }
     });
 
