@@ -14,9 +14,15 @@ public class UserRepository {
     this.dynamoDbClient = DynamoDbProvider.getClient();
   }
 
+
+  public UserRepository(DynamoDbClient dynamoDbClient) {
+    this.dynamoDbClient = dynamoDbClient;
+  }
+
   public ImmutableUser save(ImmutableUser user) {
     PutItemRequest putItemRequest = PutItemRequest.builder().tableName("ppdb")
-      .item(Map.of("pp_partition_key", AttributeValue.fromS(user.getPartitionKey()))).build();
+      .item(Map.of("pp_partition_key", AttributeValue.fromS(user.getPartitionKey())))
+      .build();
     dynamoDbClient.putItem(putItemRequest);
     return user;
   }
