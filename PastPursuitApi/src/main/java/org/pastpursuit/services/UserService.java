@@ -41,38 +41,13 @@ public class UserService {
     Response.ResponseBuilder response = Response.status(Response.Status.CREATED)
       .entity(createdUser);
 
-    boolean useLocalOrigin = System.getenv("USE_LOCAL_ORIGIN") != null;
-    String origin = useLocalOrigin ?
-                    "http://localhost:5173" :
-                    "https://pastpursuit.io";
-    LOG.info("Setting Access-Control-Allow-Origin to: {}", origin);
-
-    response.header("Access-Control-Allow-Origin", origin);
-    response.header("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE, HEAD");
-    response.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-    response.header("Access-Control-Allow-Credentials", "true");
-    response.header("Access-Control-Allow-Private-Network", "true");
-
     return response.build();
   }
 
   @OPTIONS
   public Response handleOptions() {
     LOG.info("Handling OPTIONS request");
-    Response.ResponseBuilder response = Response.ok();
-    boolean useLocalOrigin = System.getenv("USE_LOCAL_ORIGIN") != null;
-    String origin = useLocalOrigin ?
-                    "http://localhost:5173" :
-                    "https://pastpursuit.io";
-    LOG.info("Setting Access-Control-Allow-Origin to: {}", origin);
-
-    response.header("Access-Control-Allow-Origin", origin);
-    response.header("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE, HEAD");
-    response.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-    response.header("Access-Control-Allow-Credentials", "true");
-    response.header("Access-Control-Allow-Private-Network", "true");
-
-    return response.build();
+    return Response.ok().build();
   }
 
   public void updateUser(ImmutableUser user) {
@@ -81,5 +56,12 @@ public class UserService {
 
   public Optional<ImmutableUser> getByEmail(String email) {
     return userRepository.getByEmail(email);
+  }
+
+  @GET
+  @Path("/leaderboard")
+  public Response getLeaderboard() {
+    return Response.ok().entity(userRepository.getLeadingUsersByNumberOfWins())
+      .build();
   }
 }

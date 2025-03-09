@@ -12,6 +12,8 @@ import software.amazon.awssdk.services.dynamodb.model.QueryResponse;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class UserRepository {
   private static final Logger LOG = LoggerFactory.getLogger(UserRepository.class);
@@ -55,5 +57,21 @@ public class UserRepository {
 
     Map<String, AttributeValue> ddbRow = queryResponse.items().getFirst();
     return Optional.of(User.fromDynamoDbRow(ddbRow));
+  }
+
+  public Set<ImmutableUser> getLeadingUsersByNumberOfWins() {
+    QueryRequest queryRequest = QueryRequest.builder()
+      .tableName(DynamoDbProvider.DB_NAME)
+      .indexName("pp_partition_key-wins-index")
+      .keyConditionExpression("begins_with(pp_partition_key, :u)")
+      .expressionAttributeValues(Map.of(":u", AttributeValue.fromS("USER")))
+      .scanIndexForward(false)
+      .limit(10)
+      .build();
+
+    QueryResponse queryResponse = dynamoDbClient.query(queryRequest);
+    return queryResponse.items().stream()
+      .map(User::fromDynamoDbRow)
+      .collect(Collectors.toSet());
   }
 }

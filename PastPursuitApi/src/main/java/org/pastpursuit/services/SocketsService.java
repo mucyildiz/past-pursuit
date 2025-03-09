@@ -104,6 +104,7 @@ public class SocketsService extends WebSocketApplication {
   }
 
   private void handleGameExit(GameEvent gameEvent) {
+    LOG.info("Game exit event received: {}", gameEvent);
     GameState gameState = gameStates.get(gameEvent.getGameCode());
     gameState.setCurrentState(CurrentGameState.GAME_EXIT);
     broadcastGameState(gameState);
